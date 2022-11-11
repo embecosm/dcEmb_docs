@@ -73,7 +73,9 @@ Inheritance diagram for dynamic_model:</div>
 <div class="dyncontent">
 <div class="center"><img src="classdynamic__model__inherit__graph.png" border="0" usemap="#dynamic__model_inherit__map" alt="Inheritance graph"/></div>
 <map name="dynamic__model_inherit__map" id="dynamic__model_inherit__map">
-<area shape="rect" id="node2" href="classpeb__model.html" title="peb_model\&lt; dynamic\l_model_template \&gt;" alt="" coords="5,80,152,121"/>
+<area shape="rect" id="node2" href="classdynamic__3body__model.html" title="dynamic_3body_model" alt="" coords="5,87,160,114"/>
+<area shape="rect" id="node3" href="classdynamic__COVID__model.html" title="dynamic_COVID_model" alt="" coords="184,87,347,114"/>
+<area shape="rect" id="node4" href="classpeb__model.html" title="peb_model\&lt; dynamic\l_model_template \&gt;" alt="" coords="371,80,517,121"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -150,10 +152,10 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <tr class="separator:ac0fdf1b7ef018462debec9ef6c8f2ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A base class for dynamic causal models within the Embecosm DCM package</p>
+<div class="textblock"><p>A base class for dynamic causal models within the dcEmb package</p>
 <p>Copyright (C) 2022 Embecosm Limited</p>
 <p>Contributor William Jones <a href="#" onclick="location.href='mai'+'lto:'+'wil'+'li'+'am.'+'jo'+'nes'+'@e'+'mbe'+'co'+'sm.'+'co'+'m'; return false;">willi<span style="display: none;">.nosp@m.</span>am.j<span style="display: none;">.nosp@m.</span>ones@<span style="display: none;">.nosp@m.</span>embe<span style="display: none;">.nosp@m.</span>cosm.<span style="display: none;">.nosp@m.</span>com</a> Contributor Elliot Stein <a href="#" onclick="location.href='mai'+'lto:'+'E.S'+'te'+'in@'+'so'+'ton'+'.a'+'c.u'+'k'; return false;">E.Ste<span style="display: none;">.nosp@m.</span>in@s<span style="display: none;">.nosp@m.</span>oton.<span style="display: none;">.nosp@m.</span>ac.u<span style="display: none;">.nosp@m.</span>k</a></p>
-<p>This file is part of the Embecosm Dynamic Causal Modeling package</p>
+<p>This file is part of the dcEmb package</p>
 <p>SPDX-License-Identifier: GPL-3.0-or-later Base class for all Dynamic Causal Models. Specific implementations of DCM for a given purpose should inherit from this class, and overwrite the get_observed_outcomes function, the get_forward_model function and the forward_model function. </p>
 
 <p class="definition">Definition at line <a class="el" href="dynamic__model_8hh_source.html#l00023">23</a> of file <a class="el" href="dynamic__model_8hh_source.html">dynamic_model.hh</a>.</p>
@@ -174,7 +176,7 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div><div class="memdoc">
 <p>Empty constructor for the <a class="el" href="classdynamic__model.html">dynamic_model</a> class </p>
 
-<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00355">355</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
+<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00276">276</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
 
 </div>
 </div>
@@ -196,7 +198,7 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div><div class="memdoc">
 <p>Forward model function for the Dynamic Causal Model. Takes a vector of parameters and potentially other arguments, and returns time series data in a vector </p>
 
-<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00343">343</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
+<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00266">266</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
 
 </div>
 </div>
@@ -224,7 +226,9 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div><div class="memdoc">
 <p>Wrapper for the forward_model_function. Must create a wrapped fuction that takes a vector and returns a vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00328">328</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
+<p>Reimplemented in <a class="el" href="classdynamic__COVID__model.html#aab896622a34818623bd7b4e07065619a">dynamic_COVID_model</a>, and <a class="el" href="classdynamic__3body__model.html#a54bf4027bb0605c54278fe8b34a1532b">dynamic_3body_model</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00256">256</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
 
 </div>
 </div>
@@ -252,7 +256,9 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div><div class="memdoc">
 <p>Getter function for the response variables that is a suitable place to apply a transform </p>
 
-<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00318">318</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
+<p>Reimplemented in <a class="el" href="classdynamic__COVID__model.html#a85d24512a3ebecf5713bb7d1a52a7000">dynamic_COVID_model</a>, and <a class="el" href="classdynamic__3body__model.html#a0e8c810a73258d56ed624bc09edd9b2e">dynamic_3body_model</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00247">247</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
 
 </div>
 </div>
@@ -286,7 +292,7 @@ Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </ul>
 <p>Once inverted, a models pa </p>
 
-<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00030">30</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
+<p class="definition">Definition at line <a class="el" href="dynamic__model_8cc_source.html#l00033">33</a> of file <a class="el" href="dynamic__model_8cc_source.html">dynamic_model.cc</a>.</p>
 
 </div>
 </div>

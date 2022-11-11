@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reduce',['reduce',['../classbmr__model.html#ab636c57d4299fd8e4bbe2c48b3b70a6c',1,'bmr_model']]]
+  ['invert_5fmodel',['invert_model',['../classdynamic__model.html#a11a8600bea9805b811b4f91be3028730',1,'dynamic_model::invert_model()'],['../classpeb__model.html#a21dadb18c46e6d241c46468dafb50f2b',1,'peb_model::invert_model()']]]
 ];

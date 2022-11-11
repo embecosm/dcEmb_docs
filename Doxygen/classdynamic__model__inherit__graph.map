@@ -1,3 +1,5 @@
 <map id="dynamic_model" name="dynamic_model">
-<area shape="rect" id="node2" href="$classpeb__model.html" title="peb_model\&lt; dynamic\l_model_template \&gt;" alt="" coords="5,80,152,121"/>
+<area shape="rect" id="node2" href="$classdynamic__3body__model.html" title="dynamic_3body_model" alt="" coords="5,87,160,114"/>
+<area shape="rect" id="node3" href="$classdynamic__COVID__model.html" title="dynamic_COVID_model" alt="" coords="184,87,347,114"/>
+<area shape="rect" id="node4" href="$classpeb__model.html" title="peb_model\&lt; dynamic\l_model_template \&gt;" alt="" coords="371,80,517,121"/>
 </map>

@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['ccu_5fperiod',['ccu_period',['../structparameter__location__COVID.html#ab760e29f796bff8e9254896c40473e30',1,'parameter_location_COVID']]],
   ['conditional_5fhyper_5fcovariances',['conditional_hyper_covariances',['../classpeb__model.html#a64a4f2aa1f79d6080fe6ebc21c5271a7',1,'peb_model']]],
   ['conditional_5fhyper_5fexpectations',['conditional_hyper_expectations',['../classdynamic__model.html#a1602bfb08f9856238aed78476c6fa3ab',1,'dynamic_model']]],
   ['conditional_5fparameter_5fcovariances',['conditional_parameter_covariances',['../classdynamic__model.html#af66f815932ee864ba7c82315fa45c89b',1,'dynamic_model']]],

@@ -63,28 +63,20 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>An open source implementation of the Dynamic Causal Modelling framework in C++ by Embecosm.</p>
-<h1>Build Instructions</h1>
-<h2>External Dependencies</h2>
+<h1>Minimum Requirements</h1>
 <ul>
 <li>Cmake</li>
 <li>C++ 14 compatible compiler</li>
 </ul>
-<h2>Ubuntu</h2>
-<ol type="1">
-<li>Clone the repository</li>
-<li>Initialise git submodules (git submodule update &ndash;init)</li>
-<li>Create and navigate into a build directory (mkdir build &amp;&amp; mv build)</li>
-<li>Run CMake (cmake .. &amp;&amp; cmake &ndash;build)</li>
-<li>Run the executable of your choice (e.g, ./dcm_3body)</li>
-</ol>
-<h2>Windows</h2>
-<p>WIP</p>
-<h2>Mac</h2>
-<p>WIP</p>
-<h1>Manual and Documentation</h1>
-<p>Documentation is provided with doxygen and sphinx. To build the documentation in ubuntu, run: </p><pre class="fragment">doxygen /doc/Doxyfile.in
-</pre><h1>Licensing</h1>
-<p>This code is available under a GPL 3.0 license </p>
+<h1>Documentation</h1>
+<p>This codebase is documented with Doxygen and Sphinx. Online versions of documentation can be found <a href="https://embecosm.github.io/dcEmb_docs/">here</a>, and also come attached to the repository.</p>
+<p>To build sphinx documentation: 1) sphinx-build -b html man/source man/build 2) doxygen doc/Doxyfile.in</p>
+<h1>Getting Started</h1>
+<p>See the online manual <a href="https://embecosm.github.io/dcEmb_docs/">here</a>.</p>
+<h1>Changelog</h1>
+<p>A log of changes made to the code can be found in markdown format in the NEWS file.</p>
+<h1>Licensing</h1>
+<p>This code is available under a GPL 3.0 license. The code makes use of third party library code that is licensed under MPL 2.0 and BSD 3-clause licenses. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

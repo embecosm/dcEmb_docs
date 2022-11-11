@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Building Your Own model &#8212; dcEmb v0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/embecosm-theme.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+    <link rel="prev" title="Documentation" href="doxygen.html" /> 
+  </head><body>
+<div class="logo">
+  <a href="index.html">
+    <img src="_static/logo.png"
+         alt="Embecosm Logo" width="185" height="75"/></a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="doxygen.html" title="Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dcEmb v0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Building Your Own model</a></li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table of Contents</a></h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="currentmodels.html">Current Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doxygen.html">Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building Your Own model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#foreword">Foreword</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#worked-example-dcm-3body">Worked Example: dcm_3body</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testingsuite.html">Testing Suite</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/howto.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="building-your-own-model">
+<span id="howto"></span><h1>Building Your Own model<a class="headerlink" href="#building-your-own-model" title="Permalink to this headline">¶</a></h1>
+<section id="foreword">
+<h2>Foreword<a class="headerlink" href="#foreword" title="Permalink to this headline">¶</a></h2>
+<p>This section is a guide for writing a Dynamic Causal Model for your
+own application. Be warned that the code is currently under development,
+and that these instructions are likely to change significantly as time goes on.</p>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<section id="creating-your-model">
+<h3>Creating your model<a class="headerlink" href="#creating-your-model" title="Permalink to this headline">¶</a></h3>
+<p>The dcEmb Dynamic Causal Model library provides support for creating arbitary
+DCM models through inheritance. The core idea is that the
+only things you should need to write for your own application are:</p>
+<ol class="arabic simple">
+<li><p>Your forward (generative) model, and</p></li>
+<li><p>Estimates of parameter/hyperparameter distributions.</p></li>
+</ol>
+<p>To write your own DCM you simply need to create a new class that
+inherits from the dynamic_model class. The Dynamic Model class contains two
+virtual methods that you will be forced to overwrite. This are:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">virtual</span> <span class="pre">Eigen::VectorXd</span> <span class="pre">get_observed_outcomes();</span></code></p>
+<p>A function that returns a vector of all observations you are training the model
+based on, subject to any suitable transformations.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">virtual</span> <span class="pre">std::function&lt;Eigen::VectorXd</span>
+<span class="pre">(Eigen::VectorXd)&gt;</span> <span class="pre">get_forward_model_function();</span></code></p>
+<p>A function that return a wrapped link to your generative function. The
+wrapped function must take a vector of parameters, and return a vector of
+predicted observations.</p>
+<p>Once you have overwritten these methods in your class, the only thing you need
+to do is create an instance of your class, populate the parameters specifying
+parameter/hyperparameter distributions (plus a few others) and call
+<code class="code docutils literal notranslate"><span class="pre">new_model.invert()</span></code>. The current parameters that are mandatory are:</p>
+<p>1. <code class="code docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">prior_parameter_expectations;</span></code>, a vector of the
+prior parameter expectations</p>
+<p>2. <code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">prior_parameter_covariances;</span></code>, the covariance Matrix
+containing the prior parameter covariances</p>
+<p>3. <code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">prior_hyper_covariances;</span></code>, a vector of the
+prior “hyperparameter” expectations</p>
+<p>4. <code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">prior_hyper_covariances;</span></code>, the covariance Matrix
+containing the prior “hyperparameter” covariances</p>
+<p>5. <code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">response_vars;</span></code>, the matrix of observations over
+(potentially serveral variables) to train
+the model on</p>
+<p>6. <code class="code docutils literal notranslate"><span class="pre">int</span> <span class="pre">num_samples;</span></code>, the number of timesteps in the observation
+matrix</p>
+<p>7. <code class="code docutils literal notranslate"><span class="pre">int</span> <span class="pre">num_response_vars;</span></code>, the number of different variables in the
+observation matrix</p>
+<p>8. <code class="code docutils literal notranslate"><span class="pre">Eigen::VectorXi</span> <span class="pre">select_response_vars;</span></code>, a vector enumerating which
+columns of the outcome matrix generated by our generative model correspond to
+the columns of the observation matrix we are training on.</p>
+</section>
+<section id="advanced-functions">
+<h3>Advanced functions<a class="headerlink" href="#advanced-functions" title="Permalink to this headline">¶</a></h3>
+<p>There are several functions, for example Bayesian Model Reduction (BMR), or
+Parametric Empirical Bayes (PEB) which are called on dynamic causal models
+themselves. These functions have been made generic and should be able to be
+called over any DCM-like class through the use of <a class="reference external" href="https://cplusplus.com/doc/oldtutorial/templates/">templating</a>. For example, to create a PEB class in the
+COVID example, we do:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">peb_model&lt;dynamic_COVID_model&gt;</span> <span class="pre">PEB;</span></code></p>
+<p>Some of these classes may require additional parameters to be specified before
+they can be run. PEB, for example will require a matrix specifying random
+effects, as well as a between-subject design matrix.</p>
+<p>A worked example for these functions is still a work in progress. We suggest
+anyone interested in pursuing this further references the
+<a class="reference external" href="https://embecosm.github.io/dcEmb_docs/Doxygen/index.html">documentation</a>
+for these functions.</p>
+</section>
+</section>
+<section id="worked-example-dcm-3body">
+<h2>Worked Example: dcm_3body<a class="headerlink" href="#worked-example-dcm-3body" title="Permalink to this headline">¶</a></h2>
+<p>In this section, we work through the steps we’ve just described in an example
+creating our three body problem DCM example.</p>
+<p>The goal of this example is to use the DCM method to recover a known set of
+results from a physical system. The system in question is the three body
+problem, the problem of finding the trajectories of three planetary bodies in
+space. There exist several known stable orbits for the three body problem,
+which are periodic. In this example, we will take one of these stable solutions
+(a “figure of 8” orbit), and the positions, masses and velocities of <em>one</em> of
+the planets in this orbit, and use the DCM method to (hopefully accurately)
+estimate the positions, masses and velocities of the other two.</p>
+<section id="creating-the-base-model">
+<h3>Creating the base model<a class="headerlink" href="#creating-the-base-model" title="Permalink to this headline">¶</a></h3>
+<p>In this section, we walk through creating a new DCM, and placing an appropriate
+three body problem forward model inside it.</p>
+<p>Chronologically, the first thing we need to do following the instructions
+above, is to create a new class that inherits from the dynamic_model class. To do this
+we create a new folder in the <em>include</em> subdirectory of the project, called
+“3body”, and inside this create a new file called “dynamic_3body_model.hh”,
+with the following content:</p>
+<p><strong>include/3body/dynamic_3body_model.hh</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;dynamic_model.hh&quot;</span><span class="cp"></span>
+<span class="cp">#pragma once</span>
+
+<span class="k">class</span> <span class="nc">dynamic_3body_model</span> <span class="o">:</span> <span class="k">public</span> <span class="n">dynamic_model</span> <span class="p">{</span>
+  <span class="n">dynamic_3body_model</span><span class="p">();</span> <span class="c1">// Class Constructor</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>Continuing to follow the above instructions, we also need to populate this class
+with at least the following functions: <code class="code docutils literal notranslate"><span class="pre">get_observed_outcomes()</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">get_forward_model_function()</span></code>.</p>
+<p><strong>include/3body/dynamic_3body_model.hh</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;dynamic_model.hh&quot;</span><span class="cp"></span>
+<span class="cp">#pragma once</span>
+
+<span class="k">class</span> <span class="nc">dynamic_3body_model</span> <span class="o">:</span> <span class="k">public</span> <span class="n">dynamic_model</span> <span class="p">{</span>
+ <span class="k">public</span><span class="o">:</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">get_observed_outcomes</span><span class="p">();</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">)</span><span class="o">&gt;</span><span class="n">get_forward_model_function</span><span class="p">();</span>
+  <span class="n">dynamic_3body_model</span><span class="p">();</span>  <span class="c1">// Class Constructor</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The above code realizes the class definition for dynamic_3body_model. We now
+need to go away and create the implementations of these functions we
+have just defined.</p>
+<p>In this case, our forward model will take the initial state of our three planets
+(positions, masses, and velocities) and produce a time series of the state over
+a given period. We can do this by using newtons law of gravitation to create
+equations of motion dictating the planets movements over time
+(see <a class="reference external" href="https://evgenii.com/blog/three-body-problem-simulator/">here</a> for a
+simple walkthrough). These equations of motion lack an analytical solution, so
+we solve them using numerical methods. We suggest using the runge-kutta method,
+of which an implementation is provided in dCEmbs utility module.</p>
+<p>Putting this together speaks to the creation of two functions, an “equation of
+motion” function evaluating the rate of change of the state, given the current
+state, and a main “generative model” function that iteratively applies the
+runge-kutta method to this to produce a time series. In the current version of
+the code, we also implement a <code class="code docutils literal notranslate"><span class="pre">forward</span> <span class="pre">model()</span></code> function that
+explicitly wraps the entire forward model. We should implement these functions
+as member functions of our dynamic_3body_model class. To do this, we will
+first need to change our dynamic_3body_model.hh header file to include
+definitions for three new functions <code class="code docutils literal notranslate"><span class="pre">eval_generative()</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">forward</span> <span class="pre">model()</span></code>, and <code class="code docutils literal notranslate"><span class="pre">differential_eq()</span></code>:</p>
+<p><strong>include/3body/dynamic_3body_model.hh</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">dynamic_3body_model</span> <span class="o">:</span> <span class="k">public</span> <span class="n">dynamic_model</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">parameter_location_3body</span> <span class="n">parameter_locations</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">num_bodies</span><span class="p">;</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">get_observed_outcomes</span><span class="p">();</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">get_forward_model_function</span><span class="p">();</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">forward_model</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+      <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">,</span>
+      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span><span class="o">&amp;</span> <span class="n">select_response_vars</span><span class="p">);</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">eval_generative</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+      <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">);</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">eval_generative</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+      <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">,</span>
+      <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span><span class="o">&amp;</span> <span class="n">select_response_vars</span><span class="p">);</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">differential_eq</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">state</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">num_bodies</span><span class="p">);</span>
+  <span class="n">dynamic_3body_model</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>As well as the <code class="code docutils literal notranslate"><span class="pre">parameters()</span></code> and <code class="code docutils literal notranslate"><span class="pre">timeseries_length()</span></code> parameters,
+which we use in our function definitions for the parameters our generative
+model will use, and the length of the timeseries it produces, we also pass it
+<code class="code docutils literal notranslate"><span class="pre">select_response_vars()</span></code>. This is a variable that we will use later
+in order to match up our generative models outputs to our training data.</p>
+<p>We also need to create implementations for each of these functions. To do this,
+we need to create a new folder in the <em>src</em> subdirectory of our project, called
+3body, and create a new file in it called dynamic_3body_model.cc. This file
+should have each of the following blocks of content in it:</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>includes</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;dynamic_3body_model.hh&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;utility.hh&quot;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&quot;Eigen/Core&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;Eigen/Dense&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;Eigen/SVD&quot;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;chrono&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;functional&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;list&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>We first specify our includes. As well as several standard library functions,
+and the matrix library <em>Eigen</em>, we’re using the class definition in
+<strong>dynamic_3body_model.hh</strong>, and several utility functions defined in
+<strong>utility.hh</strong>.</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>get_observed_outcomes</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;dynamic_model.hh&quot;</span><span class="cp"></span>
+<span class="cp">#pragma once</span>
+
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">dynamic_3body_model::get_observed_outcomes</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">observed_outcomes</span><span class="p">(</span>
+      <span class="k">this</span><span class="o">-&gt;</span><span class="n">response_vars</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span>
+      <span class="k">this</span><span class="o">-&gt;</span><span class="n">response_vars</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">response_vars</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">observed_outcomes</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Our <code class="code docutils literal notranslate"><span class="pre">get_observed_outcomes()</span></code> function is fairly simple, and simply
+returns <code class="code docutils literal notranslate"><span class="pre">response_vars</span></code> (our true observed outcomes that we are training
+on) as a vector if it wasn’t already one.</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>get_forward_model_function</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;dynamic_model.hh&quot;</span><span class="cp"></span>
+<span class="cp">#pragma once</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">dynamic_3body_model</span><span class="o">::</span><span class="n">get_forward_model_function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">forward_model</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span>
+      <span class="o">&amp;</span><span class="n">dynamic_3body_model</span><span class="o">::</span><span class="n">forward_model</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_1</span><span class="p">,</span>
+      <span class="k">this</span><span class="o">-&gt;</span><span class="n">num_samples</span><span class="p">,</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">select_response_vars</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">forward_model</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">get_forward_model_function()</span></code> function is also simple, and returns a
+wrapped version of our forward model function, with the timeseries_length
+bound to the num_samples parameter of our dynamic_3body_model class.</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>forward_model_function</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">dynamic_3body_model::forward_model</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+    <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">,</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span><span class="o">&amp;</span> <span class="n">select_response_vars</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">gen</span> <span class="o">=</span>
+      <span class="n">eval_generative</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">timeseries_length</span><span class="p">,</span> <span class="n">select_response_vars</span><span class="p">);</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">output</span><span class="p">(</span><span class="n">gen</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">gen</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="n">gen</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">forward_model_function()</span></code> calls our generative model, and converts the
+output to a vector.</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>eval_generative</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">eval_generative</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+    <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Initialize output matrix</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">output</span> <span class="o">=</span>
+      <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">,</span> <span class="n">parameters</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+  <span class="kt">double</span> <span class="n">h</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">;</span> <span class="c1">// Step Size</span>
+  <span class="c1">// Initial state = input parameters</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">state</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">;</span>
+  <span class="c1">// First row of output matrix is initial state</span>
+  <span class="n">output</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+  <span class="c1">// Wrap the &quot;differential eq&quot; function, so it can be passed around</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">dfdt</span> <span class="o">=</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">differential_eq</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">placeholders</span><span class="o">::</span><span class="n">_1</span><span class="p">);</span>
+  <span class="c1">// Iterate over the time series length</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">timeseries_length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Do 10 runge-kutta steps for each time step, for smoother output</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Update the state using runge-kutta</span>
+      <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">state_delta</span> <span class="o">=</span> <span class="n">utility</span><span class="o">::</span><span class="n">rungekutta</span><span class="p">(</span><span class="n">dfdt</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span>
+      <span class="n">state</span> <span class="o">=</span> <span class="n">state</span> <span class="o">+</span> <span class="n">state_delta</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">// Add current state to relevant row in output</span>
+    <span class="n">output</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">output</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">dynamic_3body_model::eval_generative</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">parameters</span><span class="p">,</span>
+    <span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">timeseries_length</span><span class="p">,</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span><span class="o">&amp;</span> <span class="n">select_response_vars</span><span class="p">)</span> <span class="p">{</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">output</span> <span class="o">=</span> <span class="n">eval_generative</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">parameter_locations</span><span class="p">,</span>
+                                        <span class="n">timeseries_length</span><span class="p">,</span> <span class="n">num_bodies</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="n">output</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">all</span><span class="p">,</span> <span class="n">select_response_vars</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>We provide two implementations of eval_generative here, one which uses the
+<code class="code docutils literal notranslate"><span class="pre">select_response_vars()</span></code> variable to return only certain columns (useful
+for when we wish to compare to a restricted set of training data), and one
+which simply returns all columns.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">eval_generative()</span></code> Repeatedly calls our equations of motion for the
+3body problem, using the runge-kutta method to produce updates for each
+timestep. This implementation envisages that while the state is input as a
+vector, said vector can be
+converted to a matrix in which each column corresponds to a planet. We’ll
+discuss a sensible strategy for creating such a vector further down.</p>
+<p><strong>src/3body/dynamic_3body_model.cc</strong></p>
+<p><em>differential_eq</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">differential_eq</span><span class="p">(</span>
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">state_in</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">state_var</span> <span class="o">=</span> <span class="n">state_in</span><span class="p">;</span>
+  <span class="c1">// Gravitational Constant</span>
+  <span class="kt">double</span> <span class="n">G</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="c1">// Convert our state vector to a matrix where each col is a planet</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&gt;</span> <span class="n">state</span><span class="p">(</span><span class="n">state_var</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+  <span class="c1">// Initialise return matrix</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">return_matrix</span> <span class="o">=</span>
+      <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span> <span class="n">state</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">state</span><span class="p">.</span><span class="n">cols</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>    <span class="c1">// For each planet in turn</span>
+    <span class="n">return_matrix</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>        <span class="c1">// Update position x by velocity x</span>
+    <span class="n">return_matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>        <span class="c1">// Update position y by velocity y</span>
+    <span class="n">return_matrix</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>        <span class="c1">// Update position z by velocity z</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">state</span><span class="p">.</span><span class="n">cols</span><span class="p">();</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// For each other planet</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">continue</span><span class="p">;</span> <span class="c1">// Skip if comparing a planet to itself</span>
+      <span class="p">}</span>
+      <span class="kt">double</span> <span class="n">distancex</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">-</span> <span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// x distance</span>
+      <span class="kt">double</span> <span class="n">distancey</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">-</span> <span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// y distance</span>
+      <span class="kt">double</span> <span class="n">distancez</span> <span class="o">=</span> <span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">-</span> <span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>  <span class="c1">// z distance</span>
+      <span class="kt">double</span> <span class="n">distance_euclidian</span> <span class="o">=</span>
+          <span class="n">sqrt</span><span class="p">((</span><span class="n">distancex</span> <span class="o">*</span> <span class="n">distancex</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">distancey</span> <span class="o">*</span> <span class="n">distancey</span><span class="p">)</span> <span class="o">+</span>
+               <span class="p">(</span><span class="n">distancez</span> <span class="o">*</span> <span class="n">distancez</span><span class="p">));</span>  <span class="c1">// euclidian distance</span>
+      <span class="c1">// Update the x velocity by the x acceleration calculated at this point</span>
+      <span class="n">return_matrix</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">+=</span>
+          <span class="p">(</span><span class="n">G</span> <span class="o">*</span> <span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">distancex</span><span class="p">)</span> <span class="o">/</span> <span class="n">pow</span><span class="p">(</span><span class="n">distance_euclidian</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+      <span class="c1">// Update the y velocity by the y acceleration calculated at this point</span>
+      <span class="n">return_matrix</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">+=</span>
+          <span class="p">(</span><span class="n">G</span> <span class="o">*</span> <span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">distancey</span><span class="p">)</span> <span class="o">/</span> <span class="n">pow</span><span class="p">(</span><span class="n">distance_euclidian</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+      <span class="c1">// Update the z velocity by the z acceleration calculated at this point</span>
+      <span class="n">return_matrix</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">+=</span>
+          <span class="p">(</span><span class="n">G</span> <span class="o">*</span> <span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">distancez</span><span class="p">)</span> <span class="o">/</span> <span class="n">pow</span><span class="p">(</span><span class="n">distance_euclidian</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// Convert return matrix to vector</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">return_state</span><span class="p">(</span>
+      <span class="n">return_matrix</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">return_matrix</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="n">return_matrix</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">return_state</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">differential_eq()</span></code> Implements the equations of motion. Given a state
+(positions, masses and velocities of each of the three planets), describes
+the rate of change of that state.</p>
+<p>With all these pieces in place, we have implemented our dynamic_3body_model
+class, and populated it with a forward model that will produce the trajectories
+of 3 bodies in space. We now move on to how to test this.</p>
+</section>
+<section id="testing-the-forward-model">
+<h3>Testing the Forward Model<a class="headerlink" href="#testing-the-forward-model" title="Permalink to this headline">¶</a></h3>
+<p>In this section, we write a short piece of code to test the forward model that
+we have just created.</p>
+<p>The above code will need a few minor modifications before we can perform model
+inversion on it, but we can (and should) check first that the forward model that
+we have created is valid. To do this, we’ll need to create function that
+creates a new dynamic_3body_model object and calls it’s generative model
+function, and a main function (so that we can run out C++ program) .
+Following the convention that the main function should easily found, we suggest
+placing the main function in it’s own file (<em>src/3body/run_3body_dcm.cc</em>), and
+the code implementing our forward model test in a separate file
+(<em>src/3body/DEM_3body.cc</em>). For the DEM_3body file, we will also need a header
+file (<em>include/3body/DEM_3body.hh</em>). For run_dcm_3body, as long as the only
+function it contains is main, we  will not.</p>
+<p>Creating the file with our main function in is easy. The following is
+sufficient:</p>
+<p><strong>src/3body/run_3body_dcm.cc</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;DEM_3body.hh&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">test</span> <span class="o">=</span> <span class="n">run_3body_test</span><span class="p">();</span>
+  <span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+  <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">run_3body_test()</span></code> will be a function we define in DEM_3body for running
+our forward model test.</p>
+<p>Creating the files for our demo functions will requires us to at least define
+the <code class="code docutils literal notranslate"><span class="pre">run_3body_test()</span></code> function . We also suggest defining a
+function to return a vector of our “true” figure-of-8 stable parameters in
+order to keep the code tidy. In this example, we call this
+<code class="code docutils literal notranslate"><span class="pre">true_prior_expectations()</span></code>. This gives us our header file
+(<em>include/3body/DEM_3body.hh</em>) as:</p>
+<p><strong>include/3body/DEM_3body.hh</strong></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;Eigen/Dense&quot;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;parameter_location_3body.hh&quot;</span><span class="cp"></span>
+<span class="cp">#pragma once</span>
+
+<span class="kt">int</span> <span class="nf">run_3body_test</span><span class="p">();</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">true_prior_expectations</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The implementations of these functions might look like:</p>
+<p><strong>src/3body/DEM_3body.cc</strong></p>
+<p><em>run_3body_test</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">run_3body_test</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">dynamic_3body_model</span> <span class="n">model</span><span class="p">;</span>
+
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">out1</span> <span class="o">=</span>
+      <span class="n">model</span><span class="p">.</span><span class="n">eval_generative</span><span class="p">(</span><span class="n">true_prior_expectations</span><span class="p">(),</span> <span class="mi">1000</span><span class="p">);</span>
+  <span class="n">utility</span><span class="o">::</span><span class="n">print_matrix</span><span class="p">(</span><span class="s">&quot;../visualisation/true_generative.csv&quot;</span><span class="p">,</span> <span class="n">out1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Our function simply creates a dynamic_3body_model object, and calls the
+<code class="code docutils literal notranslate"><span class="pre">eval_generative()</span></code> function we defined earlier. This will return a matrix
+in which each column is an item in the state (position, mass, velocity of a
+planet), and each row is a timestep. The print matrix function puts these values
+in a file. Our <code class="code docutils literal notranslate"><span class="pre">true_prior_expectations()</span></code> will look like:</p>
+<p><strong>src/3body/DEM_3body.cc</strong></p>
+<p><em>true_prior_expectations</em></p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">true_prior_expectations</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">default_prior_expectation</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// Masses</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.97000436</span><span class="p">,</span> <span class="mf">-0.97000436</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Pos X</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">-0.24308753</span><span class="p">,</span> <span class="mf">0.24308753</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Pos Y</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//Pos Z</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.93240737</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.93240737</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+      <span class="mf">-0.93240737</span><span class="p">;</span> <span class="c1">// Velocity X</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.86473146</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.86473146</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+      <span class="mf">-0.86473146</span><span class="p">;</span> <span class="c1">// Velocity Y</span>
+  <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Velocity Z</span>
+  <span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">return_default_prior_expectation</span><span class="p">(</span>
+      <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span>
+      <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">return_default_prior_expectation</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Our strategy here is to define each row to be a parameter, and each column to
+be a planet. This makes our earlier generative function very easy to write.
+Unfortunately, since we need to pass parameters in a vector in, we will need to
+vectorize the resulting matrix, then unvectorize it when we wish to use it.</p>
+<p>To compile the code, you can either build the code on the command line or
+(we suggest) piggyback on the CMake system we use to build the other examples.
+To avoid duplicating effort, we won’t rediscuss this here, but simply link to
+the <a class="reference internal" href="#building-worked"><span class="std std-ref">relevant section</span></a>.</p>
+<p>You can visualize these with the visualise_3body.py script in the visualization
+subdirectlry (note: WIP - script is not user friendly) or your favorite
+graphing software.</p>
+</section>
+<section id="inverting-a-model">
+<h3>Inverting a model<a class="headerlink" href="#inverting-a-model" title="Permalink to this headline">¶</a></h3>
+<p>In the previous sections, we defined and tested our forward model. Before we
+can invert the model, we need to define several extra parameters. We need
+to define our priors, the data we’re going to train on, and how this data
+relates to our generative model.</p>
+<p>Defining the priors is fairly easy, we just need to set the following variables.</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">prior_parameter_expectations;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">prior_parameter_covariances;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">Eigen::VectorXd</span> <span class="pre">prior_hyper_expectations;</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">Eigen::MatrixXd</span> <span class="pre">prior_hyper_covariances;</span></code></p></li>
+</ul>
+<p>We suggest creating functions to populate these values. Sensible values would
+be:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">default_prior_expectations</span><span class="p">()</span> <span class="p">{</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">default_prior_expectation</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.97000436</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">-0.97000436</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">-0.24308753</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.24308753</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">-0.05</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.93240737</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="mf">0.93240737</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">-0.93240737</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.86473146</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="mf">0.86473146</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">-0.86473146</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">;</span>
+<span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">-0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">;</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">return_default_prior_expectation</span><span class="p">(</span>
+    <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span>
+    <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="n">default_prior_expectation</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+<span class="k">return</span> <span class="n">return_default_prior_expectation</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">default_prior_covariances</span><span class="p">()</span> <span class="p">{</span>
+<span class="kt">double</span> <span class="n">flat</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>                    <span class="c1">// flat priors</span>
+<span class="kt">double</span> <span class="n">informative</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="mi">16</span><span class="p">;</span>  <span class="c1">// informative priors</span>
+<span class="kt">double</span> <span class="n">precise</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="mi">256</span><span class="p">;</span>     <span class="c1">// precise priors</span>
+<span class="kt">double</span> <span class="n">fixed</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="mi">2048</span><span class="p">;</span>      <span class="c1">// precise priors</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">default_prior_covariance</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">row</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Constant</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">informative</span><span class="p">);</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;</span> <span class="n">default_prior_covariance_diag</span><span class="p">(</span>
+    <span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span>
+    <span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">rows</span><span class="p">()</span> <span class="o">*</span> <span class="n">default_prior_covariance</span><span class="p">.</span><span class="n">cols</span><span class="p">());</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">return_default_prior_covariance</span> <span class="o">=</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">21</span><span class="p">);</span>
+<span class="n">return_default_prior_covariance</span><span class="p">.</span><span class="n">diagonal</span><span class="p">()</span> <span class="o">=</span> <span class="n">default_prior_covariance_diag</span><span class="p">;</span>
+<span class="k">return</span> <span class="n">return_default_prior_covariance</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="nf">default_hyper_expectations</span><span class="p">()</span> <span class="p">{</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">default_hyper_expectation</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">default_hyper_expectation</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="nf">default_hyper_covariances</span><span class="p">()</span> <span class="p">{</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">default_hyper_covariance</span> <span class="o">=</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">default_hyper_covariance</span><span class="p">.</span><span class="n">diagonal</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">256.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">256.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">256.0</span><span class="p">;</span>
+<span class="k">return</span> <span class="n">default_hyper_covariance</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>To define the data we train on a sensible approach is to run the generative
+model with the “true” values, but then only keep one of the planets data to
+train on. We can use the select_response_vars variable that we defined for
+out generative model earlier to do this. We can also set this same parameter
+for out dynamic_3body_model object to indicate to the model that these
+are the relevant data to train on.</p>
+<p>Putting this together, we end up with:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">run_3body_test</span><span class="p">()</span> <span class="p">{</span>
+<span class="n">dynamic_3body_model</span> <span class="n">model</span><span class="p">;</span> <span class="c1">// Create new model object</span>
+<span class="c1">// Set priors</span>
+<span class="n">model</span><span class="p">.</span><span class="n">prior_parameter_expectations</span> <span class="o">=</span> <span class="n">default_prior_expectations</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">prior_parameter_covariances</span> <span class="o">=</span> <span class="n">default_prior_covariances</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">prior_hyper_expectations</span> <span class="o">=</span> <span class="n">default_hyper_expectations</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">prior_hyper_covariances</span> <span class="o">=</span> <span class="n">default_hyper_covariances</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">parameter_locations</span> <span class="o">=</span> <span class="n">default_parameter_locations</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span> <span class="c1">// Set number of timesteps to train</span>
+<span class="n">model</span><span class="p">.</span><span class="n">num_response_vars</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="c1">// Select number of parameters in training data</span>
+
+<span class="c1">// Run the Generative Model over the parameters of a true stable orbit</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">out1</span> <span class="o">=</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">eval_generative</span><span class="p">(</span><span class="n">true_prior_expectations</span><span class="p">(),</span>
+                            <span class="n">model</span><span class="p">.</span><span class="n">parameter_locations</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">utility</span><span class="o">::</span><span class="n">print_matrix</span><span class="p">(</span><span class="s">&quot;../visualisation/true_generative.csv&quot;</span><span class="p">,</span> <span class="n">out1</span><span class="p">);</span>
+
+<span class="c1">// Initialise training data variables</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">response_vars</span> <span class="o">=</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">num_response_vars</span><span class="p">);</span>
+<span class="c1">// Initialise training data location variables</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span> <span class="n">select_response_vars</span> <span class="o">=</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXi</span><span class="o">::</span><span class="n">Zero</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">num_response_vars</span><span class="p">);</span>
+<span class="n">select_response_vars</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">;</span>
+<span class="n">response_vars</span> <span class="o">=</span> <span class="n">out1</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">all</span><span class="p">,</span> <span class="n">select_response_vars</span><span class="p">);</span>
+<span class="c1">// Set locations of parameters in training data</span>
+<span class="n">model</span><span class="p">.</span><span class="n">select_response_vars</span> <span class="o">=</span> <span class="n">select_response_vars</span><span class="p">;</span>
+<span class="c1">// Set training data</span>
+<span class="n">model</span><span class="p">.</span><span class="n">response_vars</span> <span class="o">=</span> <span class="n">response_vars</span><span class="p">;</span>
+
+<span class="c1">// Invert Model</span>
+<span class="n">model</span><span class="p">.</span><span class="n">invert_model</span><span class="p">();</span>
+<span class="c1">// Print generative model evaluated over posterior means to file</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">out2</span> <span class="o">=</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">eval_generative</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">conditional_parameter_expectations</span><span class="p">,</span>
+                            <span class="n">model</span><span class="p">.</span><span class="n">parameter_locations</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">utility</span><span class="o">::</span><span class="n">print_matrix</span><span class="p">(</span><span class="s">&quot;../visualisation/deriv_generative.csv&quot;</span><span class="p">,</span> <span class="n">out2</span><span class="p">);</span>
+<span class="c1">// Print generative model evaluated over prior means to file (for comparison)</span>
+<span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">out3</span> <span class="o">=</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">eval_generative</span><span class="p">(</span><span class="n">default_prior_expectations</span><span class="p">(),</span>
+                            <span class="n">model</span><span class="p">.</span><span class="n">parameter_locations</span><span class="p">,</span> <span class="n">model</span><span class="p">.</span><span class="n">num_samples</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+<span class="n">utility</span><span class="o">::</span><span class="n">print_matrix</span><span class="p">(</span><span class="s">&quot;../visualisation/org_generative.csv&quot;</span><span class="p">,</span> <span class="n">out3</span><span class="p">);</span>
+
+<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Running this code should result in the creation of three files:</p>
+<ul class="simple">
+<li><p><em>true_generative.csv</em>, the true state over time of a stable orbit.</p></li>
+<li><p><em>deriv_generative.csv</em>, the state over time, based on the mean of the
+posterior estimates of parameters</p></li>
+<li><p><em>org_generative.csv</em>, the state over time, based on the mean of the
+prior estimates of parameters</p></li>
+</ul>
+<p>Visualizing this code, either with <em>visualisation/visualise_3body.py</em>, or
+your tool of choice, you should observe that the posterior estimates and
+true solution are almost identical, while the prior estimates quickly degenerate
+into chaos.</p>
+</section>
+<section id="building-your-project-using-cmake">
+<span id="building-worked"></span><h3>Building your project using CMake<a class="headerlink" href="#building-your-project-using-cmake" title="Permalink to this headline">¶</a></h3>
+<p>dcEmb uses <a class="reference external" href="https://cmake.org/">CMake</a> as its build system. Here, we cover
+very quickly the basic steps you’d need to take in order to add the above
+3body example code to the existing build script. For instructions on running
+the build script to build the project, see
+<a class="reference external" href="install">installation instructions</a>.</p>
+<p>There are three things we need to add to the build script in order to get
+our choice example to build. We need to point CMake toward the header files,
+we need to define all the sources of code our executable will need, and we need
+to define the parameters by which it is compiler.</p>
+<p>CMake does almost all of the heavy lifting with the header files, we simply
+need to add an entry in the include_directories pointing toward the folder
+containing our include files.</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">include_directories</span><span class="p">(</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/lib/cereal/include</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/lib/eigen</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/include</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/include/COVID</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/include/3body</span> <span class="c"># e.g. here</span>
+    <span class="o">${</span><span class="nv">CMAKE_SOURCE_DIR</span><span class="o">}</span><span class="s">/include/tests</span>
+    <span class="o">${</span><span class="nv">gtest_SOURCE_DIR</span><span class="o">}</span><span class="s">/include</span>
+    <span class="o">${</span><span class="nv">gtest_SOURCE_DIR</span><span class="o">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Defining source files is most cleanly done with the set function.</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="s">SOURCES_3BODY</span>
+    <span class="s">src/dynamic_model.cc</span>
+    <span class="s">src/3body/run_3body_dcm.cc</span>
+    <span class="s">src/3body/DEM_3body.cc</span>
+    <span class="s">src/3body/dynamic_3body_model.cc</span>
+    <span class="s">src/utility.cc</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Default compilation flags are set elsewhere in the CMake file, so unless we
+want to specify any further changes, we only need to add a new executable and
+(optionally, but strongly suggested) link against the OpenMP multithreading
+library.</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">dcm_3body</span> <span class="o">${</span><span class="nv">SOURCES_3BODY</span><span class="o">}</span><span class="p">)</span>
+<span class="nb">if</span><span class="p">(</span><span class="s">OpenMP_FOUND</span><span class="p">)</span>
+    <span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">dcm_3body</span> <span class="s">PUBLIC</span> <span class="s">OpenMP::OpenMP_CXX</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">(</span><span class="s">OpenMP_FOUND</span><span class="p">)</span>
+<span class="nb">set_target_properties</span><span class="p">(</span><span class="s">dcm_3body</span> <span class="s">PROPERTIES</span> <span class="s">COMPILE_FLAGS</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="doxygen.html" title="Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dcEmb v0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Building Your Own model</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, William Jones.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.1.
+    </div>
+  </body>
+</html>

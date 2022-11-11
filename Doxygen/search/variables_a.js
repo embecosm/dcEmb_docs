@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['random_5feffects',['random_effects',['../classpeb__model.html#aa570e80a3e0d996a7ed0ebe8087d79a0',1,'peb_model']]],
-  ['random_5fprecision_5fcomps',['random_precision_comps',['../classpeb__model.html#a612ac735e880de9bca28e610da546118',1,'peb_model']]],
-  ['response_5fvars',['response_vars',['../classdynamic__model.html#af0647efa6587dfd6ea26e11211cced4d',1,'dynamic_model']]]
+  ['num_5fresponse_5fvars',['num_response_vars',['../classdynamic__model.html#a4767808497b7bd338229bdb27fe74c47',1,'dynamic_model']]],
+  ['num_5fsamples',['num_samples',['../classbma__model.html#a41935d30a40e94460c30b5c156f3fde9',1,'bma_model::num_samples()'],['../classdynamic__model.html#adc2057757de37cc57d4a776a65c44202',1,'dynamic_model::num_samples()']]]
 ];
